@@ -1,0 +1,192 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global resets or overrides can go here */
+
+@keyframes pulseHighlight {
+  0% { background-color: rgba(34, 197, 94, 0.15); }
+  100% { background-color: transparent; }
+}
+
+.new-item-highlight {
+  animation: pulseHighlight 1.6s ease-out;
+}
+
+.card-glow-mask {
+  background: radial-gradient(800px 200px at var(--mx,50%) -10%, rgba(255,255,255,0.08), transparent 40%),
+              radial-gradient(600px 150px at var(--mx,50%) -20%, rgba(168,85,247,0.08), transparent 40%);
+  mix-blend-mode: overlay;
+}
+
+/* Apple-style glassmorphism background */
+.dashboard-bg {
+  background: 
+    /* Ambient light sources */
+    radial-gradient(800px 400px at 20% 20%, rgba(168, 85, 247, 0.15), transparent 50%),
+    radial-gradient(600px 300px at 80% 30%, rgba(236, 72, 153, 0.12), transparent 50%),
+    radial-gradient(700px 350px at 40% 80%, rgba(59, 130, 246, 0.1), transparent 50%),
+    radial-gradient(500px 250px at 70% 70%, rgba(16, 185, 129, 0.08), transparent 50%),
+    /* Base gradient */
+    linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 75%, #0a0a0a 100%);
+}
+
+/* Subtle grid overlay with glassmorphism effect */
+.bg-grid:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(circle at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Scrollbar styling (WebKit) */
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { 
+  background: rgba(255,255,255,0.2); 
+  border-radius: 9999px; 
+  border: 1px solid rgba(255,255,255,0.1);
+}
+*::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+*::-webkit-scrollbar-corner { background: transparent; }
+
+/* Tailwind scrollbar utilities */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+
+.scrollbar-track-transparent {
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+
+.scrollbar-thumb-white\/20 {
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+
+/* Custom scrollbar for widget content */
+.widget-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+
+.widget-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.widget-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.widget-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+  border-radius: 9999px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.widget-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+/* Line clamp utilities for text truncation */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Apple-style glassmorphism cards */
+.glass-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Ambient glow effects for widgets */
+.widget-glow {
+  position: relative;
+}
+
+.widget-glow::before {
+  content: "";
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  right: -20px;
+  bottom: -20px;
+  background: 
+    radial-gradient(circle at 30% 20%, rgba(168, 85, 247, 0.1), transparent 50%),
+    radial-gradient(circle at 70% 80%, rgba(59, 130, 246, 0.08), transparent 50%);
+  border-radius: 24px;
+  z-index: -1;
+  opacity: 0.6;
+  filter: blur(20px);
+}
+
+.widget-glow:hover::before {
+  opacity: 0.8;
+  filter: blur(25px);
+}
+
+/* Weather widget specific glow */
+.weather-glow::before {
+  background: 
+    radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.15), transparent 50%),
+    radial-gradient(circle at 70% 80%, rgba(168, 85, 247, 0.1), transparent 50%);
+}
+
+/* Incidents widget specific glow */
+.incidents-glow::before {
+  background: 
+    radial-gradient(circle at 30% 20%, rgba(236, 72, 153, 0.12), transparent 50%),
+    radial-gradient(circle at 70% 80%, rgba(239, 68, 68, 0.1), transparent 50%);
+}
+
+/* Reddit widget specific glow */
+.reddit-glow::before {
+  background: 
+    radial-gradient(circle at 30% 20%, rgba(16, 185, 129, 0.12), transparent 50%),
+    radial-gradient(circle at 70% 80%, rgba(34, 197, 94, 0.08), transparent 50%);
+}
+
+/* Recalls widget specific glow */
+.recalls-glow::before {
+  background: 
+    radial-gradient(circle at 30% 20%, rgba(239, 68, 68, 0.12), transparent 50%),
+    radial-gradient(circle at 70% 80%, rgba(245, 101, 101, 0.08), transparent 50%);
+}
+
+/* Gov feed widget specific glow */
+.gov-glow::before {
+  background: 
+    radial-gradient(circle at 30% 20%, rgba(251, 191, 36, 0.12), transparent 50%),
+    radial-gradient(circle at 70% 80%, rgba(245, 158, 11, 0.08), transparent 50%);
+}
+
+
