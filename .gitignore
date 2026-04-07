@@ -40,3 +40,4 @@ public/workbox-*.js.map
 .agents/
 skills/
 skills-lock.json
+.vercel
