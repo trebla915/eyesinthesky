@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import BaseWidget from "./BaseWidget";
 import { Badge, StatusIndicator } from "../ui/Card";
-import { Search, ExternalLink, Clock, Newspaper, Tag, User } from "lucide-react";
-import { motion } from "framer-motion";
+import { Search, ExternalLink, Clock, Newspaper, Tag, ChevronDown, ChevronUp } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { getRefreshInterval, API_ENDPOINTS } from "../../../lib/config";
 
 export default function GoogleAlertsWidget({ className = "" }) {
@@ -65,71 +65,38 @@ export default function GoogleAlertsWidget({ className = "" }) {
 }
 
 function GoogleAlertCard({ alert }) {
+  const [expanded, setExpanded] = useState(false);
+
   const getCategoryColor = (category) => {
     if (!category) return "default";
-    
     const cat = category.toLowerCase();
-    if (cat.includes('government') || cat.includes('politics')) return "secondary";
     if (cat.includes('safety') || cat.includes('police') || cat.includes('emergency')) return "danger";
     if (cat.includes('education') || cat.includes('school')) return "warning";
     if (cat.includes('health') || cat.includes('medical')) return "default";
     return "secondary";
   };
 
-  const getRelevanceColor = (relevance) => {
-    switch (relevance?.toLowerCase()) {
-      case 'high':
-        return 'text-green-400';
-      case 'medium':
-        return 'text-yellow-400';
-      case 'low':
-        return 'text-gray-400';
-      default:
-        return 'text-white/60';
-    }
-  };
-
   const formatTimestamp = (timestamp) => {
-    if (!timestamp) return "Time not available";
-    
+    if (!timestamp) return "";
     try {
-      const date = new Date(timestamp);
-      const now = new Date();
-      const diff = now - date;
+      const diff = Date.now() - new Date(timestamp).getTime();
       const minutes = Math.floor(diff / 60000);
-      
       if (minutes < 1) return "Just now";
       if (minutes < 60) return `${minutes}m ago`;
       const hours = Math.floor(minutes / 60);
       if (hours < 24) return `${hours}h ago`;
-      const days = Math.floor(hours / 24);
-      return `${days}d ago`;
-    } catch (error) {
-      return "Time not available";
-    }
+      return `${Math.floor(hours / 24)}d ago`;
+    } catch { return ""; }
   };
 
   const formatFullTimestamp = (timestamp) => {
-    if (!timestamp) return "Time not available";
-    
+    if (!timestamp) return "";
     try {
-      const date = new Date(timestamp);
-      return date.toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
+      return new Date(timestamp).toLocaleString('en-US', {
+        month: 'short', day: 'numeric',
+        hour: 'numeric', minute: '2-digit', hour12: true,
       });
-    } catch (error) {
-      return "Time not available";
-    }
-  };
-
-  const truncateText = (text, maxLength = 120) => {
-    if (!text) return '';
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
+    } catch { return ""; }
   };
 
   return (
@@ -137,84 +104,73 @@ function GoogleAlertCard({ alert }) {
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3 }}
-      className="border border-white/10 bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-colors"
+      className="border border-white/10 bg-white/5 rounded-lg overflow-hidden hover:border-white/20 transition-colors"
     >
-      <div className="flex items-start justify-between gap-4">
+      {/* Clickable header row */}
+      <button
+        onClick={() => setExpanded((v) => !v)}
+        className="w-full text-left p-4 flex items-start gap-3 focus:outline-none"
+      >
+        <Newspaper className="w-4 h-4 text-white/50 mt-0.5 flex-shrink-0" />
         <div className="flex-1 min-w-0">
-          {/* Title and Category */}
-          <div className="flex items-start gap-2 mb-3">
-            <div className="text-white/60">
-              <Newspaper className="w-4 h-4" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-medium text-white leading-tight mb-1 line-clamp-2">
-                {alert.title || "No title available"}
-              </h3>
-              <div className="flex items-center gap-2 mb-2">
-                <Badge variant={getCategoryColor(alert.category)} className="text-xs">
-                  {alert.category || "General"}
-                </Badge>
-                {alert.relevance && (
-                  <span className={`text-xs ${getRelevanceColor(alert.relevance)}`}>
-                    {alert.relevance.toUpperCase()}
-                  </span>
+          <p className="text-sm font-medium text-white leading-snug line-clamp-2 mb-1.5">
+            {alert.title || "No title available"}
+          </p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge variant={getCategoryColor(alert.category)} className="text-xs">
+              {alert.category || "General"}
+            </Badge>
+            {alert.source && (
+              <span className="flex items-center gap-1 text-xs text-white/50">
+                <Tag className="w-3 h-3" />
+                {alert.source}
+              </span>
+            )}
+            <span className="flex items-center gap-1 text-xs text-blue-400 ml-auto">
+              <Clock className="w-3 h-3" />
+              {formatTimestamp(alert.publishedAt)}
+            </span>
+          </div>
+        </div>
+        <div className="text-white/40 flex-shrink-0 mt-0.5">
+          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        </div>
+      </button>
+
+      {/* Expanded detail panel */}
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.div
+            key="detail"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="px-4 pb-4 border-t border-white/10 pt-3 space-y-3">
+              {alert.description && (
+                <p className="text-sm text-white/80 leading-relaxed">{alert.description}</p>
+              )}
+              <div className="flex items-center justify-between text-xs text-white/40">
+                <span>{formatFullTimestamp(alert.publishedAt)}</span>
+                {alert.url && alert.url !== '#' && (
+                  <a
+                    href={alert.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors font-medium"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    Read full article
+                  </a>
                 )}
               </div>
             </div>
-          </div>
-          
-          {/* Description */}
-          {alert.description && (
-            <div className="text-sm text-white/80 mb-3 leading-relaxed">
-              {truncateText(alert.description)}
-            </div>
-          )}
-          
-          {/* Source and Time */}
-          <div className="flex items-center justify-between gap-4 text-xs">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded">
-                <Clock className="w-3 h-3 text-blue-400" />
-                <span className="text-blue-400 font-medium">{formatTimestamp(alert.publishedAt)}</span>
-              </div>
-              {alert.source && (
-                <div className="text-white/60 flex items-center gap-1">
-                  <Tag className="w-3 h-3" />
-                  <span>{alert.source}</span>
-                </div>
-              )}
-            </div>
-            {alert.url && (
-              <a
-                href={alert.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
-              >
-                <ExternalLink className="w-3 h-3" />
-                <span>Read</span>
-              </a>
-            )}
-          </div>
-          
-          {/* Author and Full Timestamp */}
-          <div className="mt-2 flex items-center justify-between text-xs text-white/40">
-            <div>
-              {alert.author && (
-                <div className="flex items-center gap-1">
-                  <User className="w-3 h-3" />
-                  <span>{alert.author}</span>
-                </div>
-              )}
-            </div>
-            <div>
-              {formatFullTimestamp(alert.publishedAt)}
-            </div>
-          </div>
-        </div>
-        
-        <StatusIndicator status="active" />
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

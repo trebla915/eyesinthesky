@@ -24,16 +24,17 @@ export async function GET() {
     const items = root.querySelectorAll('item');
 
     const alerts = items.slice(0, 15).map((item, i) => {
-      const title = item.querySelector('title')?.text?.trim() ?? '';
+      const rawTitle = item.querySelector('title')?.text?.trim() ?? '';
       const link = item.querySelector('link')?.text?.trim()
         ?? item.querySelector('guid')?.text?.trim()
         ?? '#';
       const pubDate = item.querySelector('pubDate')?.text?.trim() ?? '';
       const source = item.querySelector('source')?.text?.trim() ?? '';
-      const description = item.querySelector('description')?.text
-        ?.replace(/<[^>]+>/g, '')
-        .trim()
-        .slice(0, 200) ?? '';
+      const rawDescription = item.querySelector('description')?.text ?? '';
+
+      // Decode HTML entities and strip tags
+      const title = decodeEntities(rawTitle.replace(/\s*-\s*[^-]+$/, '').trim());
+      const description = decodeEntities(rawDescription.replace(/<[^>]+>/g, '').trim()).slice(0, 200);
 
       return {
         id: `gn-${i}-${Date.now()}`,
@@ -56,6 +57,20 @@ export async function GET() {
       headers: { 'Cache-Control': 'no-store' },
     });
   }
+}
+
+function decodeEntities(str) {
+  return str
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function categorize(title) {

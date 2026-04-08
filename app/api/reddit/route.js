@@ -10,7 +10,10 @@ export async function GET(request) {
   const url = `https://www.reddit.com/r/${encodeURIComponent(sub)}/new.json?limit=${encodeURIComponent(String(limit))}`;
 
   try {
-    const response = await fetch(url, { cache: 'no-store' });
+    const response = await fetch(url, {
+      cache: 'no-store',
+      headers: { 'User-Agent': 'EyesInTheSky/1.0 (El Paso dashboard; contact: admin@eyesinthesky.app)' },
+    });
     if (!response.ok) {
       return NextResponse.json({ error: `Upstream error: ${response.status}` }, { status: response.status });
     }
